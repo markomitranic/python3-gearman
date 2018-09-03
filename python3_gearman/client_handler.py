@@ -35,17 +35,23 @@ class GearmanClientCommandHandler(GearmanCommandHandler):
 
         gearman_job = current_request.job
 
+        if not gearman_job.when_to_run == 0:
+            scheduled = True
+        else:
+            scheduled = False
+
         # Handle the I/O for requesting a job - determine which COMMAND we need
         # to send
         cmd_type = submit_cmd_for_background_priority(
-            current_request.background, current_request.priority)
+            current_request.background, current_request.priority, scheduled)
 
         outbound_data = self.encode_data(gearman_job.data)
         self.send_command(
             cmd_type,
             task=gearman_job.task,
             unique=gearman_job.unique,
-            data=outbound_data)
+            data=outbound_data,
+            when_to_run=gearman_job.when_to_run)
 
         # Once this command is sent, our request needs to wait for a handle
         current_request.state = JOB_PENDING

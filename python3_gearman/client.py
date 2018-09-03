@@ -49,9 +49,10 @@ class GearmanClient(GearmanConnectionManager):
             background=False,
             wait_until_complete=True,
             max_retries=0,
-            poll_timeout=None):
+            poll_timeout=None,
+            when_to_run=None):
         """Submit a single job to any gearman server"""
-        job_info = dict(task=task, data=data, unique=unique, priority=priority)
+        job_info = dict(task=task, data=data, unique=unique, priority=priority, when_to_run=when_to_run)
         completed_job_list = self.submit_multiple_jobs(
             [job_info],
             background=background,
@@ -263,7 +264,8 @@ class GearmanClient(GearmanConnectionManager):
             handle=None,
             task=job_info['task'],
             unique=job_unique,
-            data=job_info['data'])
+            data=job_info['data'],
+            when_to_run=job_info['when_to_run'])
 
         initial_priority = job_info.get('priority', PRIORITY_NONE)
 
@@ -310,6 +312,7 @@ class GearmanClient(GearmanConnectionManager):
         return chosen_connection
 
     def send_job_request(self, current_request):
+        print(current_request)
         """Attempt to send out a job request"""
         if (current_request.connection_attempts >=
                 current_request.max_connection_attempts):
